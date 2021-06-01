@@ -1,6 +1,7 @@
 <?php namespace Atomino\Bundle\RLogTail;
 
 use Symfony\Component\HttpFoundation\Request;
+use function Atomino\debug;
 
 class RLogTail {
 
@@ -11,45 +12,67 @@ class RLogTail {
 	const CHANNEL_ERROR = 'error';
 	const CHANNEL_EXCEPTION = 'exception';
 	const CHANNEL_TRACE = 'trace';
+	const CHANNEL_REQUEST = 'request';
 
+
+	private array $buffer = [];
 	private $unixSocketConnection;
 
-	public function __construct(private string $connection, private string $address) { }
-
-	public function send($data, $channel) {
+	public function __construct(private string $connection, private string $address) {
 		$request = Request::createFromGlobals();
-		$message = json_encode([
-			"channel"    => $channel,
-			"data" => $data,
-			"header"  => [
-				"request" => [
-					"host"   => $request->getSchemeAndHttpHost(),
-					"method" => $request->getMethod(),
-					"path"   => $request->getPathInfo(),
-				],
-			],
-		]);
-
-		if($this->connection === 'http') $this->sendHttp($message);
-		if($this->connection === 'unix-socket') $this->sendUnixSocket($message);
+		$this->send([
+			"host"   => $request->getHost(),
+			"method" => $request->getMethod(),
+			"path"   => $request->getPathInfo(),
+			"query"  => $request->getQueryString(),
+		], self::CHANNEL_REQUEST);
 	}
 
-	protected function sendUnixSocket($message){
-		if(!is_resource($this->unixSocketConnection)){
-			try{
-				$this->unixSocketConnection = stream_socket_client('unix://' . $this->address, $errorCode, $errorMessage, 12);
-			}catch (\Exception $e){}
+	public function register() { register_shutdown_function(fn() => $this->flush()); }
+
+	public function flush() {
+		$this->buffer[0]["data"]["runtime"] = (ceil((microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]) * 100000) / 100) . 'ms';
+		foreach ($this->buffer as $message) {
+			if ($this->connection === 'http') $this->sendHttp($message);
+			if ($this->connection === 'unix-socket') $this->sendUnixSocket($message);
 		}
-		if(is_resource($this->unixSocketConnection)){
+	}
+
+	public function send($data, $channel) {
+		$t = microtime(true);
+		$micro = sprintf("%06d", ($t - floor($t)) * 1000000);
+		$d = new \DateTime(date('Y-m-d H:i:s.' . $micro, $t));
+		$time = date("H:") . $d->format("i:s.u");
+
+		$message = [
+			"channel" => $channel,
+			"data"    => $data,
+			"header"  => ["time" => $time,],
+		];
+
+		$this->buffer[] = $message;
+
+	}
+
+	protected function sendUnixSocket($message) {
+		$message = json_encode($message);
+		if (!is_resource($this->unixSocketConnection)) {
+			try {
+				$this->unixSocketConnection = stream_socket_client('unix://' . $this->address, $errorCode, $errorMessage, 12);
+			} catch (\Exception $e) {
+			}
+		}
+		if (is_resource($this->unixSocketConnection)) {
 			$socket = (new \Socket\Raw\Factory())->createUnix();
-			$socket->connect( $this->address);
+			$socket->connect($this->address);
 			$socket->write($message);
 			$socket->close();
 		}
 	}
 
-	protected function sendHttp(mixed $message){
-		list($address, $port) = explode(':', $this->address);
+	protected function sendHttp(mixed $message) {
+		$message = json_encode($message);
+		[$address, $port] = explode(':', $this->address);
 		try {
 			$fp = @fsockopen($address, $port, $errno, $errstr, 30);
 			if ($fp) {
