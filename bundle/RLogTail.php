@@ -19,6 +19,7 @@ class RLogTail {
 	private $unixSocketConnection;
 
 	public function __construct(private string $connection, private string $address) {
+		$this->register();
 		$request = Request::createFromGlobals();
 		$this->send([
 			"host"   => $request->getHost(),
@@ -28,7 +29,7 @@ class RLogTail {
 		], self::CHANNEL_REQUEST);
 	}
 
-	public function register() { register_shutdown_function(fn() => $this->flush()); }
+	protected function register() { register_shutdown_function(fn() => $this->flush()); }
 
 	public function flush() {
 		$this->buffer[0]["data"]["runtime"] = (ceil((microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]) * 100000) / 100) . 'ms';
