@@ -1,4 +1,4 @@
-<?php namespace Atomino\Bundle\RLogTail;
+<?php namespace Atomino\Bundle\Debug;
 
 use Atomino\Carbon\Database\Connection;
 use Atomino\Debug\DebugHandler;
@@ -19,7 +19,7 @@ class Debug extends \Atomino\Debug\Debug {
 		\Atomino\Debug\Debug::DEBUG_ALERT,
 		\Atomino\Debug\Debug::DEBUG_DUMP,
 	)]
-	protected function sql($data, string $channel) {
+	protected function dump($data, string $channel) {
 		$this->RLogTail->send($data, match ($channel){
 			Connection::DEBUG_SQL => RLogTail::CHANNEL_SQL,
 			Connection::DEBUG_SQL_ERROR => RLogTail::CHANNEL_SQL_ERROR,

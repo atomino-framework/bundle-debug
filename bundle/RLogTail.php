@@ -1,7 +1,6 @@
-<?php namespace Atomino\Bundle\RLogTail;
+<?php namespace Atomino\Bundle\Debug;
 
 use Symfony\Component\HttpFoundation\Request;
-use function Atomino\debug;
 
 class RLogTail {
 

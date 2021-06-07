@@ -1,5 +1,5 @@
 {
-    "name": "atomino/bundle-rlogtail",
+    "name": "atomino/bundle-debug",
     "authors": [
         {
             "name": "laborci",
@@ -11,7 +11,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Atomino\\Bundle\\RLogTail\\": "bundle/"
+            "Atomino\\Bundle\\Debug\\": "bundle/"
         }
     }
 }
