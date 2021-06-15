@@ -1,34 +1,30 @@
 <?php namespace Atomino\Bundle\Debug;
 
 use Atomino\Carbon\Database\Connection;
-use Atomino\Debug\DebugHandler;
-use Atomino\Debug\ErrorHandlerInterface;
-use function Atomino\debug;
+use Atomino\Core\Debug\Channel;
+use Atomino\Core\Debug\ErrorHandlerInterface;
+use function Atomino\Core\Debug;
 
-class Debug extends \Atomino\Debug\Debug {
+class DebugHandler extends \Atomino\Core\Debug\DebugHandler {
 
 	public function __construct(private RLogTail $RLogTail) { parent::__construct(); }
 
-	protected function handleUnknownType(string $channel, mixed $data) {
-		$this->RLogTail->send('Unknown debug channel: ' . $channel, RLogTail::CHANNEL_ALERT);
-	}
-
-	#[DebugHandler(
+	#[Channel(
 		Connection::DEBUG_SQL,
 		Connection::DEBUG_SQL_ERROR,
-		\Atomino\Debug\Debug::DEBUG_ALERT,
-		\Atomino\Debug\Debug::DEBUG_DUMP,
+		\Atomino\Core\Debug\DebugHandler::DEBUG_ALERT,
+		\Atomino\Core\Debug\DebugHandler::DEBUG_DUMP,
 	)]
 	protected function dump($data, string $channel) {
 		$this->RLogTail->send($data, match ($channel){
 			Connection::DEBUG_SQL => RLogTail::CHANNEL_SQL,
 			Connection::DEBUG_SQL_ERROR => RLogTail::CHANNEL_SQL_ERROR,
-			\Atomino\Debug\Debug::DEBUG_ALERT => RLogTail::CHANNEL_ALERT,
-			\Atomino\Debug\Debug::DEBUG_DUMP => RLogTail::CHANNEL_DUMP,
+			\Atomino\Core\Debug\DebugHandler::DEBUG_ALERT => RLogTail::CHANNEL_ALERT,
+			\Atomino\Core\Debug\DebugHandler::DEBUG_DUMP => RLogTail::CHANNEL_DUMP,
 		});
 	}
 
-	#[DebugHandler(ErrorHandlerInterface::DEBUG_ERROR)]
+	#[Channel(ErrorHandlerInterface::DEBUG_ERROR)]
 	protected function error($data) {
 		if(array_key_exists('trace', $data)){
 			$trace = $data['trace'];
@@ -39,7 +35,7 @@ class Debug extends \Atomino\Debug\Debug {
 		if(isset($trace)) $this->RLogTail->send($trace, RLogTail::CHANNEL_TRACE);
 	}
 
-	#[DebugHandler(ErrorHandlerInterface::DEBUG_EXCEPTION)]
+	#[Channel(ErrorHandlerInterface::DEBUG_EXCEPTION)]
 	protected function exception($data) {
 		$trace = $data['trace'];
 		unset($data['trace']);

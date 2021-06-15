@@ -56,10 +56,12 @@ class RLogTail {
 
 	protected function sendUnixSocket($message) {
 		$message = json_encode($message);
+		if(!file_exists($this->address)) return false;
 		if (!is_resource($this->unixSocketConnection)) {
 			try {
 				$this->unixSocketConnection = stream_socket_client('unix://' . $this->address, $errorCode, $errorMessage, 12);
 			} catch (\Exception $e) {
+
 			}
 		}
 		if (is_resource($this->unixSocketConnection)) {

@@ -1,6 +1,6 @@
 <?php namespace Atomino\Bundle\Debug;
 
-use Atomino\Debug\ErrorHandlerInterface;
+use Atomino\Core\Debug\ErrorHandlerInterface;
 use function Atomino\debug;
 
 class ErrorHandler implements ErrorHandlerInterface {
@@ -69,7 +69,7 @@ class ErrorHandler implements ErrorHandlerInterface {
 			E_STRICT => 'STRICT',
 			E_RECOVERABLE_ERROR => 'RECOVERABLE_ERROR',
 			E_DEPRECATED => 'DEPRECATED',
-			E_USER_DEPRECATED => 'USER_DEPRECATED',
+			E_USER_DEPRECATED => 'USER_DEPRECATED'
 		};
 	}
 
