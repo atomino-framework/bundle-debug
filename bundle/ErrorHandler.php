@@ -1,6 +1,7 @@
 <?php namespace Atomino\Bundle\Debug;
 
 use Atomino\Core\Debug\ErrorHandlerInterface;
+use Monolog\Logger;
 use function Atomino\debug;
 
 class ErrorHandler implements ErrorHandlerInterface {
@@ -18,7 +19,7 @@ class ErrorHandler implements ErrorHandlerInterface {
 			'message'    => $errstr,
 			'file'       => $errfile,
 			'line'       => $errline,
-		], self::DEBUG_ERROR);
+		], self::ERROR, Logger::ERROR, null);
 	}
 	public function exception(\Throwable $exception) {
 		$line = $exception->getLine();
@@ -34,16 +35,17 @@ class ErrorHandler implements ErrorHandlerInterface {
 				'message'    => $message,
 				'file'       => $file,
 				'line'       => $line,
-				'trace'      => $trace,
-			], self::DEBUG_ERROR);
+			], self::DEBUG_ERROR, Logger::ERROR, null);
+			debug(['trace' => $trace,], self::TRACE, Logger::DEBUG, null);
+
 		} else {
 			debug([
 				'type'    => $type,
 				'message' => $message,
 				'file'    => $file,
 				'line'    => $line,
-				'trace'   => $trace,
-			], self::DEBUG_EXCEPTION);
+			], self::EXCEPTION, Logger::ERROR, null);
+			debug(['trace' => $trace,], self::TRACE, Logger::DEBUG, null);
 		}
 	}
 

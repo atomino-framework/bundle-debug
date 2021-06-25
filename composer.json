@@ -7,7 +7,7 @@
         }
     ],
     "require": {
-        "clue/socket-raw": "^1.4"
+        "codedungeon/php-cli-colors": "^1.12"
     },
     "autoload": {
         "psr-4": {
