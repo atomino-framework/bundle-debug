@@ -6,6 +6,9 @@ use function Atomino\debug;
 
 class ErrorHandler implements ErrorHandlerInterface {
 
+	const DEBUG_CHANNEL_ERROR = 'ERROR';
+	const DEBUG_CHANNEL_EXCEPTION = 'EXCEPTION';
+	const DEBUG_CHANNEL_TRACE = 'TRACE';
 
 	public function fatalError() {
 		if (!is_null($error = error_get_last())) {
@@ -35,8 +38,8 @@ class ErrorHandler implements ErrorHandlerInterface {
 				'message'    => $message,
 				'file'       => $file,
 				'line'       => $line,
-			], self::DEBUG_ERROR, Logger::ERROR, null);
-			debug(['trace' => $trace,], self::TRACE, Logger::DEBUG, null);
+			], self::DEBUG_CHANNEL_ERROR, Logger::ERROR, null);
+			debug(['trace' => $trace,], self::DEBUG_CHANNEL_TRACE, Logger::DEBUG, null);
 
 		} else {
 			debug([
@@ -44,8 +47,8 @@ class ErrorHandler implements ErrorHandlerInterface {
 				'message' => $message,
 				'file'    => $file,
 				'line'    => $line,
-			], self::EXCEPTION, Logger::ERROR, null);
-			debug(['trace' => $trace,], self::TRACE, Logger::DEBUG, null);
+			], self::DEBUG_CHANNEL_EXCEPTION, Logger::ERROR, null);
+			debug(['trace' => $trace,], self::DEBUG_CHANNEL_TRACE, Logger::DEBUG, null);
 		}
 	}
 
