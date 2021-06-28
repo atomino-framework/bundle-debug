@@ -22,7 +22,7 @@ class ErrorHandler implements ErrorHandlerInterface {
 			'message'    => $errstr,
 			'file'       => $errfile,
 			'line'       => $errline,
-		], self::ERROR, Logger::ERROR, null);
+		], self::DEBUG_CHANNEL_ERROR, Logger::ERROR, null);
 	}
 	public function exception(\Throwable $exception) {
 		$line = $exception->getLine();

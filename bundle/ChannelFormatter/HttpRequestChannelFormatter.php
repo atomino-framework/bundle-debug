@@ -3,14 +3,10 @@
 use Codedungeon\PHPCliColors\Color;
 use Atomino\Bundle\Debug\ChannelFormatterInterface;
 use Symfony\Component\HttpFoundation\Request;
+use function Atomino\debug;
 
 class HttpRequestChannelFormatter implements ChannelFormatterInterface {
-	/**
-	 * @param string $channel
-	 * @param Request $payload
-	 * @param string $datetime
-	 * @return string
-	 */
+
 	public function format(string $channel, mixed $payload, string $datetime): string {
 		$text = Color::BLACK . Color::BG_LIGHT_MAGENTA . Color::BOLD . " " . $channel . " " . Color::RESET ;
 		$text.= Color::LIGHT_WHITE_ALT.Color::BG_MAGENTA.' '.$payload->getMethod().' '.Color::RESET.' ';
