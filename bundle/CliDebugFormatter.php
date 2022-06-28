@@ -1,5 +1,6 @@
 <?php namespace Atomino\Bundle\Debug;
 
+use Atomino\Core\Application;
 use Codedungeon\PHPCliColors\Color;
 use Monolog\Formatter\NormalizerFormatter;
 
@@ -19,9 +20,11 @@ class CliDebugFormatter extends NormalizerFormatter {
 	}
 
 	public function format(array $record): string {
-		return array_key_exists($record['channel'], $this->formatters)
+		return
+			Color::GRAY.Application::instance()->id." ".Color::RESET.
+			(array_key_exists($record['channel'], $this->formatters)
 			? $this->formatters[$record['channel']]->format($record['channel'], $record["context"]["payload"], $record['datetime']).Color::RESET
-			: $this->defaultFormatter($record['channel'], $record["context"]["payload"], $record['datetime']).Color::RESET;
+			: $this->defaultFormatter($record['channel'], $record["context"]["payload"], $record['datetime']).Color::RESET);
 	}
 
 }
